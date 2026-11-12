@@ -16,7 +16,7 @@
 | 命令或检查 | 实际结果 |
 | --- | --- |
 | `python -m ruff check src tests tools` | 通过 |
-| `python -m pytest -q` | 47 项通过，1 项 Mac 原生图像转换测试在 Windows 跳过 |
+| `python -m pytest -q` | 最终 49 项通过，3 项 Mac 原生测试在 Windows 跳过 |
 | `python tools/preview_effects.py` | 四种效果关键帧及六秒视频生成成功，关键帧已检查 |
 | `python tools/desktop_check.py` | 原重锤七项桌面检查通过 |
 | `python tools/desktop_check.py --effect glass` | 七项通过，首次触发 4.500 秒，捕获像素差 0 |
@@ -33,7 +33,7 @@ Windows 实机为单屏 2560×1600、150% 缩放。玻璃效果扫描均值 628.
 
 ## Mac 验证状态
 
-本地为 Windows。Mac 系统调用已加入原生 CI 测试，双架构构建与打包冒烟结果待 GitHub 执行后更新。本轮未取得用户 Mac 的屏幕录制及辅助功能授权环境。真实自动识别、Retina 多屏、Space 切换、全屏应用与全局快捷键仍待实机验收。应用尚未完成 Developer ID 签名与 Apple 公证。
+本地为 Windows。Mac 系统调用、双架构构建与打包冒烟已在 CI 验证，结果见下表。本轮未取得用户 Mac 的屏幕录制及辅助功能授权环境。真实自动识别、Retina 多屏、Space 切换、全屏应用与全局快捷键仍待实机验收。应用尚未完成 Developer ID 签名与 Apple 公证。
 
 ## 首轮 CI 发现与修正
 
@@ -47,3 +47,20 @@ Windows 实机为单屏 2560×1600、150% 缩放。玻璃效果扫描均值 628.
 - 审查发现辅助功能查询应由 ApplicationServices 提供，已改用明确的系统框架符号，并增加原生权限查询及 ScreenCaptureKit API 契约测试。
 
 公开 wheel 版本均为 `opencv-python-headless 4.11.0.86`、`cp37-abi3-macosx_13_0`。arm64 wheel SHA-256 为 `48128188ade4a7e517237c8e1e11a9cdf5c282761473383e77beb875bb1e61ca`，x86_64 为 `a66c1b286a9de872c343ee7c3553b084244299714ebb50fbdcd76f07ebbe6c81`。可从 [PyPI 文件列表](https://pypi.org/project/opencv-python-headless/4.11.0.86/#files) 核对。
+
+## 最终交付验证
+
+源码验收提交为 `deef7f40e31273cbade86f017cb04c9d4f24d272`。后续文档提交仅补充本记录与任务勾选，使用文档专用跳过 CI 标记，源码与构建流程和该验收提交一致。
+
+| 环境 | 测试 | 构建、启动与扫描 |
+| --- | --- | --- |
+| Windows 本地与 CI | 49 项通过、3 项原生 Mac 测试跳过 | 本地 EXE 启动成功，338 个条目和 14 个模块扫描无发现，CI 检查通过 |
+| macOS 15 arm64 CI | 52 项通过 | `.app` 构建、ad-hoc 签名校验及启动成功，766 个条目和 14 个模块扫描无发现 |
+| macOS 15 Intel CI | 52 项通过 | `.app` 构建、ad-hoc 签名校验及启动成功，773 个条目和 14 个模块扫描无发现 |
+
+三个任务均成功。[CI 运行记录](https://github.com/Yean0919/Crit-strike-selected-target/actions/runs/43162657234)
+
+- [Apple Silicon 构建产物](https://github.com/Yean0919/Crit-strike-selected-target/actions/runs/43162657234/artifacts/13918537764)
+- [Intel 构建产物](https://github.com/Yean0919/Crit-strike-selected-target/actions/runs/43162657234/artifacts/13918054560)
+
+Actions artifact 外层 ZIP 包含对应架构的应用 ZIP。当前保留至 2027-02-10，届时可从源码重新构建。本地 Windows 输出为 `dist/CritStrike/CritStrike.exe` 与 `dist/CritStrike-windows-x64.zip`。效果预览为 `artifacts/impact-preview.mp4`。
