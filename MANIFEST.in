@@ -1,0 +1,6 @@
+include THIRD_PARTY_NOTICES.md
+include requirements-dev.lock
+recursive-include docs *.md
+recursive-include specs *.md
+recursive-include tools *.py
+recursive-include tests *.py
