@@ -100,3 +100,24 @@ def test_native_bgra_conversion_preserves_colors_and_orientation():
     )
     image = Quartz.CGBitmapContextCreateImage(context)
     assert np.array_equal(platform_macos.image_to_bgra(image), pixels)
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="Requires native ApplicationServices")
+def test_native_accessibility_permission_check():
+    assert type(platform_macos.accessibility_trusted()) is bool
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="Requires native ScreenCaptureKit")
+def test_native_screenshot_api_contract():
+    import ScreenCaptureKit as sc
+
+    assert hasattr(
+        sc.SCScreenshotManager, "captureImageWithFilter_configuration_completionHandler_"
+    )
+    assert hasattr(sc.SCContentFilter, "initWithDisplay_excludingApplications_exceptingWindows_")
+    configuration = sc.SCStreamConfiguration.alloc().init()
+    configuration.setWidth_(640)
+    configuration.setHeight_(480)
+    configuration.setShowsCursor_(False)
+    assert (configuration.width(), configuration.height()) == (640, 480)
+    assert not configuration.showsCursor()

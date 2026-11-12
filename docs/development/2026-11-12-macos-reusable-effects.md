@@ -34,3 +34,15 @@ Windows 实机为单屏 2560×1600、150% 缩放。玻璃效果扫描均值 628.
 ## Mac 验证状态
 
 本地为 Windows。Mac 系统调用已加入原生 CI 测试，双架构构建与打包冒烟结果待 GitHub 执行后更新。本轮未取得用户 Mac 的屏幕录制及辅助功能授权环境。真实自动识别、Retina 多屏、Space 切换、全屏应用与全局快捷键仍待实机验收。应用尚未完成 Developer ID 签名与 Apple 公证。
+
+## 首轮 CI 发现与修正
+
+运行 `43159926304` 中 Windows 检查通过，Mac arm64 和 x86_64 均完成测试、构建、签名验证与应用启动冒烟。产物扫描报告 OpenCV 自带库的固定公开内容，已下载 PyPI 的相同版本双架构 wheel 逐项比对。
+
+- libssh 的安全密钥算法名称匹配了 API key 前缀规则，libunistring 的字符名称表片段匹配了 AWS key 规则。
+- libgnutls 含五段上游公开的固定私钥数据，两种架构的内容摘要相同。
+- Intel OpenCV 带有上游 GitHub runner 构建路径，和本次 CI 的共享账户目录相同。
+- 扫描器仅按具体库路径与已核对内容的 SHA-256 匹配公开常量。OpenCV 构建路径仅识别上游完整前缀。其它内容继续扫描，回归测试覆盖修改内容与其它文件路径。
+- 审查发现辅助功能查询应由 ApplicationServices 提供，已改用明确的系统框架符号，并增加原生权限查询及 ScreenCaptureKit API 契约测试。
+
+公开 wheel 版本均为 `opencv-python-headless 4.11.0.86`、`cp37-abi3-macosx_13_0`。arm64 wheel SHA-256 为 `48128188ade4a7e517237c8e1e11a9cdf5c282761473383e77beb875bb1e61ca`，x86_64 为 `a66c1b286a9de872c343ee7c3553b084244299714ebb50fbdcd76f07ebbe6c81`。可从 [PyPI 文件列表](https://pypi.org/project/opencv-python-headless/4.11.0.86/#files) 核对。

@@ -5,6 +5,7 @@ See licenses/HAKAI-MIT.txt. Capture excludes this process through SCContentFilte
 Native imports are lazy so the geometry and callback contracts can be tested elsewhere.
 """
 
+import ctypes
 import os
 import platform
 import threading
@@ -193,6 +194,15 @@ class HotkeyEvents(QObject):
     pressed = Signal(int)
 
 
+def accessibility_trusted() -> bool:
+    services = ctypes.CDLL(
+        "/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices"
+    )
+    services.AXIsProcessTrusted.argtypes = []
+    services.AXIsProcessTrusted.restype = ctypes.c_bool
+    return bool(services.AXIsProcessTrusted())
+
+
 class Hotkeys(QAbstractNativeEventFilter):
     KEYS = {100: 1, 101: 2, 109: 3}  # macOS virtual key codes F8, F9, F10.
 
@@ -203,9 +213,8 @@ class Hotkeys(QAbstractNativeEventFilter):
 
     def register(self) -> list[int]:
         import AppKit
-        import Quartz
 
-        if not Quartz.AXIsProcessTrusted():
+        if not accessibility_trusted():
             return [1, 2, 3]
 
         def handle(event):
