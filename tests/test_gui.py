@@ -37,6 +37,34 @@ def test_all_effects_render_and_crop(application, avatar, tmp_path):
     dialog.close()
 
 
+@pytest.mark.parametrize("renderer", ["hammer", "burst"])
+def test_impact_frames_and_clean_end(application, tmp_path, renderer):
+    effects, _ = load_effects(tmp_path)
+    effect = effects[renderer]
+
+    def render(phase, size=130):
+        image = QImage(600, 600, QImage.Format.Format_ARGB32)
+        image.fill(0)
+        painter = QPainter(image)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        draw_effect(painter, effect, QPointF(300, 300), phase * effect.duration / effect.hits, size)
+        painter.end()
+        return image
+
+    charge = render(0.12)
+    contact = 0.54 if renderer == "hammer" else 0.30
+    impact = render(contact)
+    assert impact != charge
+    assert impact == render(contact)
+    center_alpha = sum(
+        impact.pixelColor(x, y).alpha() for x in range(285, 316) for y in range(285, 316)
+    )
+    assert center_alpha > 60_000
+    for size in [60, 300, 690]:
+        assert any(render(contact, size).constBits())
+    assert not any(render(effect.hits).constBits())
+
+
 def test_ui_settings_manual_and_stop(application, avatar, tmp_path, monkeypatch):
     store = Store(tmp_path)
     store.add("fixture", avatar)
