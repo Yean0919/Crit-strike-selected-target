@@ -22,3 +22,7 @@ def test_upstream_build_path_exception_preserves_application_path_detection(monk
     assert not scan.has_local_path(name, upstream, local_paths)
     assert scan.has_local_path(name, upstream + " /Users/runner/private", local_paths)
     assert scan.has_local_path("application.py", upstream, local_paths)
+    jdk = ("/Users/runner/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/"
+           "x64/Contents/Home/include/darwin")
+    assert not scan.has_local_path(name, jdk, local_paths)
+    assert scan.has_local_path(name, jdk.replace("17.0.13-11", "other"), local_paths)

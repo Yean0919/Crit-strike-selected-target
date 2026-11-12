@@ -42,6 +42,7 @@ Windows 实机为单屏 2560×1600、150% 缩放。玻璃效果扫描均值 628.
 - libssh 的安全密钥算法名称匹配了 API key 前缀规则，libunistring 的字符名称表片段匹配了 AWS key 规则。
 - libgnutls 含五段上游公开的固定私钥数据，两种架构的内容摘要相同。
 - Intel OpenCV 带有上游 GitHub runner 构建路径，和本次 CI 的共享账户目录相同。
+- 第二轮 Intel 扫描进一步定位到 OpenCV 构建信息中的固定 Temurin 17.0.13-11 JDK 头文件路径，同样在官方 wheel 中复现。仅对该完整路径进行来源识别，路径或版本改变仍会报告。
 - 扫描器仅按具体库路径与已核对内容的 SHA-256 匹配公开常量。OpenCV 构建路径仅识别上游完整前缀。其它内容继续扫描，回归测试覆盖修改内容与其它文件路径。
 - 审查发现辅助功能查询应由 ApplicationServices 提供，已改用明确的系统框架符号，并增加原生权限查询及 ScreenCaptureKit API 契约测试。
 

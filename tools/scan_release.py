@@ -43,6 +43,11 @@ def has_local_path(name: str, text: str, local_paths: list[str]) -> bool:
     if name.endswith("/cv2/cv2.abi3.so"):
         # The upstream wheel was also built on GitHub's shared /Users/runner account.
         text = text.replace("/Users/runner/work/opencv-python/opencv-python/", "<opencv-build>/")
+        text = text.replace(
+            "/Users/runner/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/"
+            "x64/Contents/Home/include",
+            "<opencv-build-jdk-headers>",
+        )
     return any(path.lower() in text.lower() for path in local_paths)
 
 
