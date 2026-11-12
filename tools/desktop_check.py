@@ -86,6 +86,8 @@ def working_set_bytes():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--soak-seconds", type=int, default=0)
+    parser.add_argument("--effect", choices=["hammer", "burst", "ring", "glass", "phaser"],
+                        default="hammer")
     args = parser.parse_args()
     enable_dpi_awareness()
     app = QApplication([])
@@ -105,10 +107,12 @@ def main():
         "checks": [],
         "scan_ms": [],
         "errors": [],
+        "effect": args.effect,
     }
     temporary = tempfile.TemporaryDirectory(prefix="crit-strike-desktop-check-")
     store = Store(Path(temporary.name))
-    store.add("合成测试头像", synthetic_avatar())
+    target = store.add("合成测试头像", synthetic_avatar())
+    target.effect = args.effect
     window = MainWindow(store, register_hotkeys=False)
     sample = SampleWindow(synthetic_avatar(), monitors[0])
     window.show()
@@ -170,6 +174,8 @@ def main():
                 if window.trigger_count:
                     assert now - phase_time >= 3
                     assert window.trigger_count == 1
+                    assert any(item.effect.id == args.effect
+                               for overlay in window.overlays.values() for item in overlay.playing)
                     report["checks"].append("visible avatar triggers after 3 seconds")
                     report["first_trigger_seconds"] = round(now - phase_time, 3)
                     # Confirm overlay rendering does not contaminate screen capture.

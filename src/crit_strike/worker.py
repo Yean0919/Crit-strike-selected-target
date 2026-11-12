@@ -1,13 +1,15 @@
+import sys
 import threading
 import time
 
 import cv2
-import mss
 import numpy as np
 from PySide6.QtCore import QThread, Signal
 
 from crit_strike.detection import Detector
 from crit_strike.models import Box, Monitor
+from crit_strike.platform_backend import create_capture
+from crit_strike.platform_macos import CapturePermissionError
 
 
 class CaptureWorker(QThread):
@@ -31,7 +33,7 @@ class CaptureWorker(QThread):
     def run(self):
         cv2.setNumThreads(2)
         try:
-            with mss.mss() as capture:
+            with create_capture() as capture:
                 previous_frames = {}
                 previous_results = {}
                 previous_exclusions = None
@@ -47,14 +49,15 @@ class CaptureWorker(QThread):
                         if self.stop_event.is_set():
                             return
                         area = monitor.physical
-                        shot = capture.grab(
-                            {
-                                "left": int(area.x),
-                                "top": int(area.y),
-                                "width": int(area.w),
-                                "height": int(area.h),
-                            }
-                        )
+                        capture_area = {
+                            "left": int(area.x),
+                            "top": int(area.y),
+                            "width": int(area.w),
+                            "height": int(area.h),
+                        }
+                        if sys.platform == "darwin":
+                            capture_area["display_id"] = monitor.index
+                        shot = capture.grab(capture_area)
                         image = np.asarray(shot)[:, :, :3]
                         previous = previous_frames.get(monitor.index)
                         if previous is None or not np.array_equal(previous, image):
@@ -69,6 +72,8 @@ class CaptureWorker(QThread):
                     duration = time.monotonic() - start
                     self.scanned.emit(detections, start, duration, self.generation)
                     self.stop_event.wait(max(0.05, self.interval - duration))
+        except CapturePermissionError as error:
+            self.failed.emit(str(error))
         except Exception:
             # Do not include screenshot contents, user paths, or template names in diagnostics.
             self.failed.emit("桌面捕获失败，已暂停。解锁桌面或检查显示器后重新启动检测。")

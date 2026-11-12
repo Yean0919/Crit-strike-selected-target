@@ -1,7 +1,9 @@
 """Scan the portable archive and embedded application bytecode before distribution."""
 
 import marshal
+import platform
 import re
+import sys
 import types
 import zipfile
 from pathlib import Path
@@ -22,10 +24,14 @@ def code_strings(code):
 
 
 def main():
-    archive = ROOT / "dist" / "CritStrike-windows-x64.zip"
-    executable = ROOT / "dist" / "CritStrike" / "CritStrike.exe"
+    if sys.platform == "darwin":
+        archive = ROOT / "dist" / f"CritStrike-macos-{platform.machine()}.zip"
+        executable = ROOT / "dist" / "CritStrike.app" / "Contents" / "MacOS" / "CritStrike"
+    else:
+        archive = ROOT / "dist" / "CritStrike-windows-x64.zip"
+        executable = ROOT / "dist" / "CritStrike" / "CritStrike.exe"
     if not archive.is_file() or not executable.is_file():
-        raise SystemExit("Build the Windows portable package first")
+        raise SystemExit("Build the native desktop package first")
     findings = set()
     local_paths = [str(ROOT), str(Path.home())]
     patterns = {name: pattern for name, pattern in PATTERNS.items() if name != "user-profile"}

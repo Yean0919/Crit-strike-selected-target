@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget
 
 from crit_strike.effects import Effect, draw_effect
 from crit_strike.models import Box, Monitor
-from crit_strike.platform_windows import exclude_capture
+from crit_strike.platform_backend import configure_overlay
 
 
 @dataclass
@@ -47,7 +47,7 @@ class Overlay(QWidget):
         logical = self.monitor.logical
         self.setGeometry(int(logical.x), int(logical.y), int(logical.w), int(logical.h))
         self.show()
-        self.capture_safe = exclude_capture(int(self.winId()))
+        self.capture_safe = configure_overlay(int(self.winId()), selecting)
 
     def select(self, enabled: bool):
         self.selecting = enabled

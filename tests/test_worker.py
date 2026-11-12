@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 from crit_strike.models import Box, Monitor
+from crit_strike.platform_macos import PERMISSION_MESSAGE, CapturePermissionError
 from crit_strike.worker import CaptureWorker
 
 
@@ -27,7 +28,7 @@ def test_worker_reuses_identical_frames_and_rechecks_changes(monkeypatch):
                 worker.stop()
             return frames[len(calls) - 1]
 
-    monkeypatch.setattr("crit_strike.worker.mss.mss", Capture)
+    monkeypatch.setattr("crit_strike.worker.create_capture", Capture)
     worker.run()
     assert len(calls) == 4
     assert detector.detect.call_count == 2
@@ -41,7 +42,20 @@ def test_worker_error_message_is_generic(monkeypatch):
     def fail():
         raise OSError("sensitive test detail")
 
-    monkeypatch.setattr("crit_strike.worker.mss.mss", fail)
+    monkeypatch.setattr("crit_strike.worker.create_capture", fail)
     worker.run()
     assert len(messages) == 1
     assert "sensitive" not in messages[0]
+
+
+def test_worker_reports_permission_revocation(monkeypatch):
+    worker = CaptureWorker(MagicMock(), [], 0.1, 1)
+    messages = []
+    worker.failed.connect(messages.append)
+
+    def fail():
+        raise CapturePermissionError(PERMISSION_MESSAGE)
+
+    monkeypatch.setattr("crit_strike.worker.create_capture", fail)
+    worker.run()
+    assert messages == [PERMISSION_MESSAGE]

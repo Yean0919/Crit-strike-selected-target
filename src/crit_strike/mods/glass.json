@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "id": "glass",
+  "name": "Hakai 玻璃碎裂",
+  "renderer": "glass",
+  "color": "#B6E4FF",
+  "duration": 1.8,
+  "hits": 1,
+  "size": 190
+}

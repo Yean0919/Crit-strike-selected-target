@@ -25,14 +25,15 @@ def main():
     output = Path("artifacts")
     output.mkdir(exist_ok=True)
     effects, _ = load_effects(output / "unused-mods")
-    sheet = QImage(2520, 1120, QImage.Format.Format_RGB32)
+    renderers = ["hammer", "burst", "glass", "phaser"]
+    sheet = QImage(2520, 2240, QImage.Format.Format_RGB32)
     sheet.fill(QColor("#111820"))
     painter = QPainter(sheet)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    for row, renderer in enumerate(["hammer", "burst"]):
+    for row, renderer in enumerate(renderers):
         effect = effects[renderer]
         phases = [0.12, 0.36, 0.49, 0.58, 0.75, 0.94]
-        if renderer == "burst":
+        if renderer in {"burst", "glass", "phaser"}:
             phases = [0.12, 0.23, 0.30, 0.48, 0.70, 0.94]
         for column, phase in enumerate(phases):
             center = QPointF(column * 420 + 210, row * 560 + 320)
@@ -42,26 +43,26 @@ def main():
     sheet.save(str(output / "impact-keyframes.png"))
 
     writer = cv2.VideoWriter(
-        str(output / "impact-preview.mp4"), cv2.VideoWriter_fourcc(*"mp4v"), 30, (960, 540)
+        str(output / "impact-preview.mp4"), cv2.VideoWriter_fourcc(*"mp4v"), 30, (960, 1080)
     )
     if not writer.isOpened():
         raise RuntimeError("Preview video encoder unavailable")
     try:
         for frame in range(180):
-            image = QImage(960, 540, QImage.Format.Format_RGB32)
+            image = QImage(960, 1080, QImage.Format.Format_RGB32)
             image.fill(QColor("#111820"))
             painter = QPainter(image)
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-            for index, renderer in enumerate(["hammer", "burst"]):
+            for index, renderer in enumerate(renderers):
                 effect = effects[renderer]
-                center = QPointF(240 + index * 480, 290)
+                center = QPointF(240 + index % 2 * 480, 290 + index // 2 * 540)
                 backdrop(painter, center)
                 painter.setPen(QColor("#eaf0f5"))
                 painter.setFont(QFont("Arial", 15))
-                painter.drawText(QPointF(center.x() - 75, 60), renderer.upper())
+                painter.drawText(QPointF(center.x() - 75, center.y() - 230), renderer.upper())
                 draw_effect(painter, effect, center, (frame / 30) % 2, effect.size)
             painter.end()
-            pixels = np.frombuffer(image.constBits(), dtype=np.uint8).reshape(540, 960, 4)
+            pixels = np.frombuffer(image.constBits(), dtype=np.uint8).reshape(1080, 960, 4)
             writer.write(cv2.cvtColor(pixels, cv2.COLOR_BGRA2BGR))
     finally:
         writer.release()

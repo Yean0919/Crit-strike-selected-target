@@ -34,7 +34,8 @@ from crit_strike.detection import Detector, Template, read_image
 from crit_strike.effects import Effect, load_effects
 from crit_strike.models import Box, Monitor
 from crit_strike.overlay import Overlay
-from crit_strike.platform_windows import Hotkeys, enable_dpi_awareness, monitor_layout
+from crit_strike.platform_backend import Hotkeys, ensure_capture_permission, monitor_layout
+from crit_strike.platform_windows import enable_dpi_awareness
 from crit_strike.storage import Store, atomic_json
 from crit_strike.tracking import Tracker
 from crit_strike.widgets import CropDialog
@@ -120,7 +121,12 @@ class MainWindow(QMainWindow):
         if mod_errors:
             self.status.setText("部分模组加载失败，可重新导入修复后的模组")
         if failed:
-            self.status.setText("部分快捷键被其他程序占用，请使用窗口或托盘按钮")
+            self.status.setText(
+                "全局快捷键不可用，请使用窗口或托盘按钮。"
+                "Mac 可在隐私与安全性中允许辅助功能权限后重启应用。"
+                if sys.platform == "darwin"
+                else "部分快捷键被其他程序占用，请使用窗口或托盘按钮"
+            )
         application = QApplication.instance()
         application.screenAdded.connect(self.screen_changed)
         application.screenRemoved.connect(self.screen_changed)
@@ -419,7 +425,7 @@ class MainWindow(QMainWindow):
             self.rebuild_overlays()
             if not all(overlay.capture_safe for overlay in self.overlays.values()):
                 raise ValueError(
-                    "特效层无法排除截图，自动模式已暂停。请使用受支持的 Windows 版本。"
+                    "特效层无法安全配置，自动模式已暂停。请检查系统版本并重新打开应用。"
                 )
             templates = [
                 Template(target.id, read_image(self.store.image_path(target.id)), target.threshold)
@@ -428,6 +434,7 @@ class MainWindow(QMainWindow):
             ]
             if not templates:
                 raise ValueError("请先导入并启用一个头像")
+            ensure_capture_permission()
         except (ValueError, OSError, RuntimeError) as error:
             self.status.setText(
                 str(error) if not isinstance(error, OSError) else "目标图片读取失败，请重新导入"

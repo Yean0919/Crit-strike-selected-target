@@ -57,13 +57,23 @@ def test_atomic_save_failure_rolls_back(tmp_path, avatar, monkeypatch):
 def test_builtin_mods_and_custom_mod(tmp_path):
     effects, errors = load_effects(tmp_path)
     assert not errors
-    assert set(effects) == {"hammer", "burst", "ring"}
+    assert set(effects) == {"hammer", "burst", "ring", "glass", "phaser"}
     data = effects["hammer"].to_json()
     data.update(id="custom", name="自定义", color="#123456")
     path = tmp_path / "custom.json"
     path.write_text(json.dumps(data), encoding="utf-8")
     assert Effect.load(path).id == "custom"
-    assert len(load_effects(tmp_path)[0]) == 4
+    assert len(load_effects(tmp_path)[0]) == 6
+
+
+def test_legacy_user_mod_with_new_builtin_id_is_preserved(tmp_path):
+    effects, _ = load_effects(tmp_path)
+    data = effects["hammer"].to_json()
+    data.update(id="glass", name="已有自定义锤子")
+    (tmp_path / "glass.json").write_text(json.dumps(data), encoding="utf-8")
+    restored, errors = load_effects(tmp_path)
+    assert not errors
+    assert restored["glass"].renderer == "hammer"
 
 
 @pytest.mark.parametrize(

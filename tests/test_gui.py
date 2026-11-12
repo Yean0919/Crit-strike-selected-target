@@ -37,7 +37,7 @@ def test_all_effects_render_and_crop(application, avatar, tmp_path):
     dialog.close()
 
 
-@pytest.mark.parametrize("renderer", ["hammer", "burst"])
+@pytest.mark.parametrize("renderer", ["hammer", "burst", "glass", "phaser"])
 def test_impact_frames_and_clean_end(application, tmp_path, renderer):
     effects, _ = load_effects(tmp_path)
     effect = effects[renderer]

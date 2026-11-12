@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "crit-strike-selected-target"
 version = "0.1.0"
-description = "Local-first Windows desktop avatar detection and playful effects"
+description = "Local-first Windows and macOS desktop avatar detection and playful effects"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 license = "Apache-2.0"
@@ -15,6 +15,8 @@ dependencies = [
   "opencv-python-headless==4.11.0.86",
   "mss==10.0.0",
   "numpy==2.2.6",
+  "pyobjc-framework-ScreenCaptureKit==11.1; sys_platform == 'darwin'",
+  "pyobjc-framework-Quartz==11.1; sys_platform == 'darwin'",
 ]
 
 [project.optional-dependencies]
@@ -27,7 +29,7 @@ crit-strike = "crit_strike.app:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-crit_strike = ["mods/*.json"]
+crit_strike = ["mods/*.json", "licenses/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -7,6 +7,8 @@ from pathlib import Path
 from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPen, QPolygonF, QRadialGradient
 
+from crit_strike.hakai_effects import draw_crack, draw_phaser
+
 
 @dataclass(frozen=True)
 class Effect:
@@ -31,7 +33,7 @@ class Effect:
                 raise ValueError("模组 ID 格式无效")
             if not isinstance(effect.name, str) or not 1 <= len(effect.name) <= 40:
                 raise ValueError("模组名称无效")
-            if effect.renderer not in {"hammer", "burst", "ring"}:
+            if effect.renderer not in {"hammer", "burst", "ring", "glass", "phaser"}:
                 raise ValueError("模组绘制器不受支持")
             if not re.fullmatch(r"#[0-9a-fA-F]{6}", effect.color):
                 raise ValueError("颜色必须为 #RRGGBB")
@@ -58,7 +60,13 @@ def load_effects(user_directory: Path) -> tuple[dict[str, Effect], list[str]]:
             try:
                 effect = Effect.load(path)
                 if effect.id in effects:
-                    raise ValueError("模组 ID 重复")
+                    # These IDs were available to user mods before the Hakai integration.
+                    # Preserve saved variants when upgrading an existing installation.
+                    legacy_variant = (
+                        directory == user_directory and effect.id in {"glass", "phaser"}
+                    )
+                    if not legacy_variant:
+                        raise ValueError("模组 ID 重复")
                 effects[effect.id] = effect
             except (ValueError, OSError):
                 errors.append("一个模组加载失败，请检查格式或重复 ID")
@@ -76,12 +84,18 @@ def draw_effect(
     painter.translate(center)
     painter.setOpacity(min(1.0, (1 - progress) * 5))
     color = QColor(effect.color)
-    if effect.renderer in {"hammer", "burst"}:
+    if effect.renderer in {"hammer", "burst", "glass", "phaser"}:
         painter.scale(size, size)
         if effect.renderer == "hammer":
             draw_hammer(painter, color, phase)
-        else:
+        elif effect.renderer == "burst":
             draw_burst(painter, color, phase)
+        elif effect.renderer == "glass":
+            draw_crack(painter, phase, int(progress * effect.hits))
+            draw_impact(painter, color, phase, 0.9)
+        else:
+            draw_phaser(painter, color, phase)
+            draw_impact(painter, color, phase, 0.7)
         painter.restore()
         return
     painter.setPen(QPen(color, 3))
@@ -173,26 +187,7 @@ def draw_hammer(painter: QPainter, color: QColor, phase: float) -> None:
         shake = 0.055 * math.exp(-impact_age * 9)
         painter.translate(math.sin(impact_age * 85) * shake, math.cos(impact_age * 73) * shake)
         draw_impact(painter, color, impact_age, 0.9)
-        painter.save()
-        painter.setOpacity(painter.opacity() * (1 - impact_age))
-        painter.setPen(QPen(QColor("#251c24"), 0.038))
-        for index in range(7):
-            direction = index * math.tau / 7
-            length = 0.38 + (index % 3) * 0.13
-            points = QPolygonF(
-                [
-                    QPointF(0, 0.06),
-                    QPointF(
-                        math.cos(direction + 0.14) * length * 0.5,
-                        math.sin(direction + 0.14) * length * 0.28 + 0.06,
-                    ),
-                    QPointF(
-                        math.cos(direction) * length, math.sin(direction) * length * 0.55 + 0.06
-                    ),
-                ]
-            )
-            painter.drawPolyline(points)
-        painter.restore()
+        draw_crack(painter, impact_age)
 
     painter.save()
     painter.setOpacity(painter.opacity() * min(1.0, (1 - phase) / 0.18))

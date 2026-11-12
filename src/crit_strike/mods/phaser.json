@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "id": "phaser",
+  "name": "Hakai 能量灼击",
+  "renderer": "phaser",
+  "color": "#FF9E29",
+  "duration": 1.6,
+  "hits": 2,
+  "size": 170
+}

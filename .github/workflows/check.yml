@@ -19,3 +19,30 @@ jobs:
       - run: python -m build
       - run: python tools/privacy_scan.py
       - run: git diff --check
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements-dev.lock
+      - run: python -m pip install -r requirements-dev.lock
+      - run: python -m pip install -e . --no-deps
+      - run: python -m ruff check src tests tools
+      - run: python -m pytest -q
+      - run: python -m build
+      - run: python tools/privacy_scan.py
+      - run: python tools/build_macos.py
+      - run: dist/CritStrike.app/Contents/MacOS/CritStrike --smoke-test
+      - run: python tools/scan_release.py
+      - run: git diff --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CritStrike-${{ matrix.runner }}
+          path: dist/CritStrike-macos-*.zip

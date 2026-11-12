@@ -1,7 +1,24 @@
 # Third-party components
 
-The project retains its original Apache-2.0 license. Application effects and test artwork are
-procedurally drawn by this project. No code or assets from BoomThere or Hakai are included.
+The project retains its original Apache-2.0 license. Effects and test artwork are procedurally
+drawn. The Hakai adaptations below retain their upstream MIT license.
+
+## Hakai source adaptations
+
+Copyright (c) 2026 Matjaz Lipus. MIT license.
+
+Upstream https://github.com/matjaz/hakai/tree/9e6fe469545abbd1a252ebb1fc45ba5e4d7f9ee3
+
+- `src/crit_strike/hakai_effects.py` adapts `hakai-core/src/decals.rs` functions
+  `make_crack` and `make_phaser_hit`, with Python seeded randomness, QPainter rendering,
+  bounded image caches, configurable tint and finite-duration animation.
+- `src/crit_strike/platform_macos.py` adapts the overlay window setup from
+  `hakai-mac/src/macos.rs` to PyObjC and Qt. Capture uses a new ScreenCaptureKit backend.
+- The original license text is included in `src/crit_strike/licenses/HAKAI-MIT.txt` and
+  distributed as `crit_strike/licenses/HAKAI-MIT.txt` in wheels and desktop bundles.
+
+The imported scope consists of MIT source algorithms. Hakai's separately licensed sound
+and font assets remain outside this distribution.
 
 | Component | Version | License and upstream |
 | --- | --- | --- |
@@ -12,6 +29,7 @@ procedurally drawn by this project. No code or assets from BoomThere or Hakai ar
 | opencv-python-headless packaging | 4.11.0.86 | MIT wrapper and third-party notices, https://github.com/opencv/opencv-python |
 | NumPy | 2.2.6 | BSD-3-Clause and bundled third-party notices, https://github.com/numpy/numpy/tree/v2.2.6 |
 | MSS | 10.0.0 | MIT, https://github.com/BoboTiG/python-mss/tree/v10.0.0 |
+| PyObjC and Cocoa / Quartz / CoreMedia / ScreenCaptureKit wrappers | 11.1, macOS only | MIT, https://github.com/ronaldoussoren/pyobjc/tree/v11.1 |
 | PyInstaller build tooling | 6.13.0 | GPL with bootloader exception, https://github.com/pyinstaller/pyinstaller/tree/v6.13.0 |
 
 The Windows portable build includes available installed distribution license files under

@@ -6,7 +6,7 @@ mss==10.0.0
 numpy==2.2.6
 opencv-python-headless==4.11.0.86
 packaging==26.3
-pefile==2023.2.7
+pefile==2023.2.7; sys_platform == 'win32'
 pluggy==1.7.0
 pyinstaller==6.13.0
 pyinstaller-hooks-contrib==2026.10
@@ -15,7 +15,12 @@ PySide6==6.8.3
 PySide6_Addons==6.8.3
 PySide6_Essentials==6.8.3
 pytest==8.3.5
-pywin32-ctypes==0.2.3
+pywin32-ctypes==0.2.3; sys_platform == 'win32'
 ruff==0.11.11
 shiboken6==6.8.3
 setuptools==79.0.1
+pyobjc-core==11.1; sys_platform == 'darwin'
+pyobjc-framework-Cocoa==11.1; sys_platform == 'darwin'
+pyobjc-framework-CoreMedia==11.1; sys_platform == 'darwin'
+pyobjc-framework-Quartz==11.1; sys_platform == 'darwin'
+pyobjc-framework-ScreenCaptureKit==11.1; sys_platform == 'darwin'

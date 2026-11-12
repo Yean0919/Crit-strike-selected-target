@@ -2,7 +2,9 @@
 
 首版模组是 UTF-8 JSON 文件，文件大小最多 16 KB。导入后保存到用户应用数据目录。每个模组 ID 必须唯一。
 
-`hammer` 使用抬锤蓄力、加速挥落、命中停顿和回弹，附带金属块面、冲击环、裂纹及碎屑。`burst` 使用收缩蓄能、放射爆闪、双层冲击波和弹道拖尾。`hits` 控制完整攻击动作的重复次数，`duration` 控制总播放时间。
+`hammer` 使用抬锤蓄力、加速挥落、命中停顿和回弹，附带金属块面、冲击环、Hakai 裂纹及碎屑。`burst` 使用收缩蓄能、放射爆闪、双层冲击波和弹道拖尾。`hits` 控制完整攻击动作的重复次数，`duration` 控制总播放时间。
+
+`glass` 移植 Hakai 的放射裂纹、连接裂缝和明暗碎片面，附带本项目的冲击与飞散碎屑。`phaser` 移植 Hakai 的熔融边缘、渐变爆心和放射灼痕，支持颜色变体。二者通过同一绘制入口在 Windows 和 macOS 使用，复制内置 `glass.json` 或 `phaser.json` 并更换 ID 即可制作自己的参数模组。
 
 ## 示例
 
@@ -26,7 +28,7 @@
 | version | 固定为 1 |
 | id | 1～40 个字符，以小写字母开头，后续可使用小写字母、数字、下划线或连字符 |
 | name | 1～40 个字符的显示名称 |
-| renderer | hammer、burst 或 ring |
+| renderer | hammer、burst、ring、glass 或 phaser |
 | color | 六位 RGB 十六进制颜色 |
 | duration | 0.4～5 秒 |
 | hits | 1～5 次 |
